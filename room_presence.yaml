@@ -2,17 +2,17 @@ substitutions:
   # name for ESP Home
   name: "shd-room-presence"
   # Mandatory room name
-  room: ""
+  room: "test"
   friendly_name: "SHD RoomPresence"
   project_name: "SmartHomeDesign.RoomPresence"
-  project_version: "1.2.2"
+  project_version: "1.3.1"
 
   # set generic offsets
-  temperature_offset: "-3.5"
+  temperature_offset: "-6.5"
   humidity_offset: "0"
   temperature_update_interval: "20s"
   illuminance_update_interval: "20s"
-  pir_delay_off: "60s"
+  pir_delay_off: "10s"
   occupancy_delay_off: "15s"
   hidden_ssid: "false"
   factory_reset_disabled: "true"
@@ -42,7 +42,6 @@ ota:
 
 wifi:
   ap: {}
-
 captive_portal:
 
 improv_serial:
@@ -50,24 +49,35 @@ improv_serial:
 esp32_improv:
   authorizer: none
 
-dashboard_import:
-  package_import_url: github://smarthomedesign/room_presence/room_presence.yaml@main
-  import_full_config: false
+# dashboard_import:
+#   package_import_url: github://smarthomedesign/room_presence/room_presence.yaml@main
+#   import_full_config: false
+
+light:
+  - platform: status_led
+    name: "ESP32 Status LED"
+    pin:
+      number: GPIO32
+      inverted: true
+      mode:
+        output: true
+        pullup: false
+    entity_category: config
 
 i2c:
   - id: bus_a   # Illuminance 
-    sda: 32
-    scl: 21
+    scl: 25
+    sda: 26
     scan: true
   - id: bus_b   # Temperature and Humidity
-    sda: 25
-    scl: 22
+    scl: 18
+    sda: 19
     scan: true
 
 uart:
   id: uart_bus
-  tx_pin: GPIO16 # reversed on PCB (17)
-  rx_pin: GPIO17 # reversed on PCB (16)
+  tx_pin: GPIO14
+  rx_pin: GPIO27
   baud_rate: 115200
   debug:
     direction: BOTH
@@ -78,7 +88,8 @@ uart:
       - lambda: UARTDebug::log_string(direction, bytes);
 
 sensor:
-  - platform: bme280
+  # temperature and humidity
+  - platform: sht4x
     temperature:
       name: "${room} Temperature"
       filters:
@@ -87,8 +98,8 @@ sensor:
       name: "${room} Humidity"
     update_interval: ${temperature_update_interval}
     i2c_id: bus_b
-    address: 0x76
-  
+    address: 0x44
+  # Illuminace sensor
   - platform: bh1750
     name: "${room} Illuminance"
     update_interval: ${illuminance_update_interval}
@@ -102,13 +113,13 @@ binary_sensor:
     id: mmwave
     device_class: occupancy
     pin:
-      number: GPIO19
+      number: GPIO13
       mode: INPUT_PULLDOWN
   
   # PIR sensor
   - platform: gpio 
     pin:
-      number: 26
+      number: 21
       mode: INPUT_PULLDOWN
     name: ${room} Motion
     id: pir_motion_sensor
