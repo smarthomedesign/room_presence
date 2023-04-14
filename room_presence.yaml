@@ -50,7 +50,7 @@ esp32_improv:
   authorizer: none
 
 dashboard_import:
-  package_import_url: github://smarthomedesign/room_presence/room_presence.yaml@main
+  package_import_url: github://smarthomedesign/room_presence/room_presence.yaml@dev
   import_full_config: false
 
 light:
