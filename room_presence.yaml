@@ -10,7 +10,7 @@ substitutions:
   # set generic offsets
   temperature_offset: "-11.5"
   humidity_offset: "0"
-  illuminance_offset: "-30"
+  illuminance_offset: "-10"
   temperature_update_interval: "20s"
   illuminance_update_interval: "20s"
   pir_delay_off: "30s"
