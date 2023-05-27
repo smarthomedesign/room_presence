@@ -8,12 +8,13 @@ substitutions:
   project_version: "1.3.1"
 
   # set generic offsets
-  temperature_offset: "-6.5"
+  temperature_offset: "-11.5"
   humidity_offset: "0"
+  illuminance_offset: "-40"
   temperature_update_interval: "20s"
   illuminance_update_interval: "20s"
-  pir_delay_off: "10s"
-  occupancy_delay_off: "15s"
+  pir_delay_off: "30s"
+  occupancy_delay_off: "60s"
   hidden_ssid: "false"
   factory_reset_disabled: "true"
   uart_target_output_disabled: "true"
@@ -39,9 +40,9 @@ api:
 
 ota:
 
+
 wifi:
   ap: {}
-
 captive_portal:
 
 improv_serial:
@@ -50,7 +51,7 @@ esp32_improv:
   authorizer: none
 
 dashboard_import:
-  package_import_url: github://smarthomedesign/room_presence/room_presence.yaml@main
+  package_import_url: github://smarthomedesign/room_presence/room_presence.yaml@dev
   import_full_config: false
 
 light:
@@ -96,12 +97,16 @@ sensor:
         offset: ${temperature_offset}
     humidity:
       name: "${room} Humidity"
+      filters:
+        offset: ${humidity_offset}
     update_interval: ${temperature_update_interval}
     i2c_id: bus_b
     address: 0x44
   # Illuminace sensor
   - platform: bh1750
     name: "${room} Illuminance"
+    filters:
+      offset: ${illuminance_offset}
     update_interval: ${illuminance_update_interval}
     i2c_id: bus_a
     address: 0x23
@@ -144,6 +149,7 @@ binary_sensor:
       else {
         return id(occupancy).state;
       }
+
 switch:
   - platform: template
     name: "mmWave Sensor"
