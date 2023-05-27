@@ -6,7 +6,6 @@ substitutions:
   friendly_name: "SHD RoomPresence"
   project_name: "SmartHomeDesign.RoomPresence"
   project_version: "1.3.1"
-
   # set generic offsets
   temperature_offset: "-11.5"
   humidity_offset: "0"
