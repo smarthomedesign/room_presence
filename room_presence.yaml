@@ -1,12 +1,16 @@
 substitutions:
   # name for ESP Home
   name: "shd-room-presence"
-  # Mandatory room name
-  room: "default_room"
   friendly_name: "SHD RoomPresence"
   project_name: "SmartHomeDesign.RoomPresence"
   project_version: "1.3.1"
-
+  hidden_ssid: "false"
+  factory_reset_disabled: "true"
+  uart_target_output_disabled: "true"
+  uart_presence_output_disabled: "true"
+  
+  # --- copy this lines into you ESPHome recently discovered devices ---
+  room: "default_room" # replace this with your room name
   # set generic offsets
   temperature_offset: "-11.5"
   humidity_offset: "0"
@@ -15,11 +19,8 @@ substitutions:
   illuminance_update_interval: "20s"
   pir_delay_off: "30s"
   occupancy_delay_off: "60s"
-  hidden_ssid: "false"
-  factory_reset_disabled: "true"
-  uart_target_output_disabled: "true"
-  uart_presence_output_disabled: "true"
-
+  # ---
+  
 esphome:
   name: "${name}"
   name_add_mac_suffix: true
