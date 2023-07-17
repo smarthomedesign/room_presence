@@ -1,23 +1,21 @@
 substitutions:
   # name for ESP Home
   name: "shd-room-presence"
-  # Mandatory room name
-  room: "default_room"
   friendly_name: "SHD RoomPresence"
   project_name: "SmartHomeDesign.RoomPresence"
-  project_version: "1.3.1"
-  # set generic offsets
-  temperature_offset: "-11.5"
-  humidity_offset: "0"
-  illuminance_offset: "-10"
+  project_version: "1.3.2"
+  factory_reset_disabled: "true"
+  uart_target_output_disabled: "true"
+  uart_presence_output_disabled: "true"
+
+  room: "default_room" # replace this with your room name
+  # temperature_offset: "-11.5"
+  # humidity_offset: "0"
+  # illuminance_offset: "0"
   temperature_update_interval: "20s"
   illuminance_update_interval: "20s"
   pir_delay_off: "30s"
   occupancy_delay_off: "60s"
-  hidden_ssid: "false"
-  factory_reset_disabled: "true"
-  uart_target_output_disabled: "true"
-  uart_presence_output_disabled: "true"
 
 esphome:
   name: "${name}"
@@ -39,9 +37,9 @@ api:
 
 ota:
 
-
 wifi:
   ap: {}
+
 captive_portal:
 
 improv_serial:
@@ -53,6 +51,9 @@ dashboard_import:
   package_import_url: github://smarthomedesign/room_presence/room_presence.yaml@dev
   import_full_config: false
 
+# preferences:
+#   flash_write_interval: 0s
+
 light:
   - platform: status_led
     name: "ESP32 Status LED"
@@ -63,6 +64,7 @@ light:
         output: true
         pullup: false
     entity_category: config
+    restore_mode: RESTORE_DEFAULT_OFF
 
 i2c:
   - id: bus_a   # Illuminance 
@@ -93,11 +95,13 @@ sensor:
     temperature:
       name: "${room} Temperature"
       filters:
-        offset: ${temperature_offset}
+        # offset: ${temperature_offset}
+        - lambda: return x + id(temperature_offset).state;
     humidity:
       name: "${room} Humidity"
       filters:
-        offset: ${humidity_offset}
+        # offset: ${humidity_offset}
+        - lambda: return x + id(humidity_offset).state;
     update_interval: ${temperature_update_interval}
     i2c_id: bus_b
     address: 0x44
@@ -105,10 +109,27 @@ sensor:
   - platform: bh1750
     name: "${room} Illuminance"
     filters:
-      offset: ${illuminance_offset}
+      # offset: ${illuminance_offset}
+      - lambda: return x + id(illuminance_offset).state;
     update_interval: ${illuminance_update_interval}
     i2c_id: bus_a
     address: 0x23
+
+# Reports the WiFi signal strength/RSSI in dB
+  - platform: wifi_signal 
+    # name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+    internal: true
+  # Reports the WiFi signal strength in %
+  - platform: copy 
+    source_id: wifi_signal_db
+    name: "${room} WiFi"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
     
 binary_sensor:
   # MMWave Sensor
@@ -169,6 +190,7 @@ switch:
     entity_category: config
     optimistic: true
     restore_state: true
+    restore_mode: RESTORE_DEFAULT_OFF
     turn_on_action:
       - switch.turn_off: mmwave_sensor
       - delay: 1s
@@ -236,13 +258,53 @@ switch:
       - switch.turn_on: mmwave_sensor
 
 number:
+  # temperature_offset
+  - platform: template
+    name: ${room} Temperature offset
+    id: temperature_offset
+    entity_category: config
+    min_value: -50.0
+    max_value: 50.0
+    initial_value: -11.5
+    optimistic: true
+    step: 0.1
+    restore_value: true
+    # unit_of_measurement: "°C"
+    mode: slider
+  # humidity_offset
+  - platform: template
+    name: ${room} Humidity offset
+    id: humidity_offset
+    entity_category: config
+    min_value: -50.0
+    max_value: 50.0
+    initial_value: 0
+    optimistic: true
+    step: 0.1
+    restore_value: true
+    # unit_of_measurement: "%"
+    mode: slider
+  # illuminance_offset
+  - platform: template
+    name: ${room} Illuminance offset
+    id: illuminance_offset
+    entity_category: config
+    min_value: -50.0
+    max_value: 50.0
+    initial_value: 0
+    optimistic: true
+    step: 0.1
+    restore_value: true
+    # unit_of_measurement: "lx"
+    mode: slider
+
   - platform: template
     name: "${room} mmWave Distance"
     id: mmwave_distance
     entity_category: config
     min_value: 0
-    max_value: 800
-    initial_value: 315
+    max_value: 915
+    initial_value: 300
     optimistic: true
     step: 15
     restore_value: true
@@ -264,8 +326,8 @@ number:
     id: mmwave_off_latency
     entity_category: config
     min_value: 1
-    max_value: 60
-    initial_value: 15
+    max_value: 90
+    initial_value: 30
     optimistic: true
     step: 1
     restore_value: true
@@ -287,7 +349,7 @@ number:
     id: mmwave_on_latency
     entity_category: config
     min_value: 0
-    max_value: 60
+    max_value: 90
     initial_value: 0
     optimistic: true
     step: 0.5
@@ -311,7 +373,7 @@ number:
     entity_category: config
     min_value: 0
     max_value: 9
-    initial_value: 7
+    initial_value: 4
     optimistic: true
     step: 1
     restore_value: true
@@ -364,3 +426,4 @@ button:
       - uart.write: "resetCfg"
       - delay: 3s
       - switch.turn_on: mmwave_sensor
+
