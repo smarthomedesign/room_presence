@@ -22,8 +22,8 @@ esphome:
   project:
     name: "${project_name}"
     version: "${project_version}"
-  includes:
-    - SEN0395_distance.h
+  # includes:
+  #   - SEN0395_distance.h
 esp32:
   board: esp32dev
   framework:
@@ -111,10 +111,10 @@ sensor:
     update_interval: ${illuminance_update_interval}
     i2c_id: bus_a
     address: 0x23
-  - platform: template
-    name: Target Distance m
-    id: target_distance_m # do not change
-    accuracy_decimals: 5
+  # - platform: template
+  #   name: Target Distance m
+  #   id: target_distance_m # do not change
+  #   accuracy_decimals: 5
 
 # Reports the WiFi signal strength/RSSI in dB
   - platform: wifi_signal 
@@ -435,7 +435,7 @@ button:
       - delay: 3s
       - switch.turn_on: mmwave_sensor
 
-custom_component:
-- lambda: |-
-    auto my_custom = new Sen0395Distance(id(uart_bus));
-    return {my_custom};
+# custom_component:
+# - lambda: |-
+#     auto my_custom = new Sen0395Distance(id(uart_bus));
+#     return {my_custom};
